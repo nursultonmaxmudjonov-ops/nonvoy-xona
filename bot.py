@@ -7,8 +7,8 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo, MenuB
 
 load_dotenv()
 
-# Берем токен из переменной окружения (или используем новый токен по умолчанию)
-TOKEN = os.getenv("BOT_TOKEN", "8841434385:AAGcXD-J-k-3EJy5sso9PStLi-Qzrdh8S_c")
+# Token faqat Render.com sozlamalaridan (yoki .env fayldan) olinadi
+TOKEN = os.getenv("BOT_TOKEN")
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
