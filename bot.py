@@ -1,16 +1,20 @@
+import os
 import asyncio
+from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo, MenuButtonWebApp
 
-TOKEN = "8841434385:AAFgNWa1sSXN_017zUxOdbHxGpiz_Pj0VUY"
+load_dotenv()
+
+# Берем токен из переменной окружения (или используем новый токен по умолчанию)
+TOKEN = os.getenv("BOT_TOKEN", "8841434385:AAGcXD-J-k-3EJy5sso9PStLi-Qzrdh8S_c")
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 WEBAPP_URL = "https://non-savdo-online.vercel.app/"
 
-# Asosiy chat tugmalari
 main_keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="🥐 Menuni ochish", web_app=WebAppInfo(url=WEBAPP_URL))],
@@ -21,7 +25,6 @@ main_keyboard = ReplyKeyboardMarkup(
 
 @dp.message(CommandStart())
 async def start_cmd(message: types.Message):
-    # Telegram'ning chap pastki burchagidagi (Chat bar) WebApp tugmasini sozlash
     try:
         await bot.set_chat_menu_button(
             chat_id=message.chat.id,
@@ -31,12 +34,12 @@ async def start_cmd(message: types.Message):
             )
         )
     except Exception as e:
-        print(f"Menu button o'rnatishda xatolik: {e}")
+        print(f"Menu button error: {e}")
 
     await message.answer(
         f"Salom, {message.from_user.first_name}!\n"
         f"**Nonchi Aka** nonvoyxonasining rasmiy botiga xush kelibsiz! 🥐\n\n"
-        f"Pastdagi tugmani bosing yoki чатнинг chap pastki qismidagi **'Menuni ochish'** tugmasidan foydalaning:",
+        f"Pastdagi tugmani bosing yoki chatning chap pastki qismidagi **'Menuni ochish'** tugmasidan foydalaning:",
         reply_markup=main_keyboard,
         parse_mode="Markdown"
     )
