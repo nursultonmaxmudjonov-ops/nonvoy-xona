@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo, MenuButtonWebApp
+from aiohttp import web
 
 load_dotenv()
 
-# Token faqat Render.com sozlamalaridan (yoki .env fayldan) olinadi
 TOKEN = os.getenv("BOT_TOKEN")
 
 bot = Bot(token=TOKEN)
@@ -74,7 +74,19 @@ async def show_about(message: types.Message):
         parse_mode="Markdown"
     )
 
+# Render bepul saxlanishi uchun kichik dummy veb-server
+async def handle(request):
+    return web.Response(text="Bot is active 24/7!")
+
 async def main():
+    app = web.Application()
+    app.router.add_get("/", handle)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get("PORT", 8080))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+
     print("Bot muvaffaqiyatli ishga tushdi...")
     await dp.start_polling(bot)
 
