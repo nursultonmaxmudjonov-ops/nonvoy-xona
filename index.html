@@ -54,15 +54,62 @@
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
         }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
     </style>
 </head>
-<body class="bg-warm-50 text-warm-900 antialiased selection:bg-amber-500 selection:text-white" x-data="bakeryApp()">
+<body class="bg-warm-50 text-warm-900 antialiased selection:bg-amber-500 selection:text-white" x-data="bakeryApp()" x-init="initApp()">
+
+    <!-- LOADING SCREEN -->
+    <div x-show="isLoading" x-transition.opacity.duration.500ms class="fixed inset-0 z-50 bg-[#1c1917] flex flex-col items-center justify-center text-white">
+        <div class="w-20 h-20 rounded-3xl bg-amber-500 flex items-center justify-center animate-bounce shadow-2xl shadow-amber-500/50 mb-4">
+            <i class="fa-solid fa-wheat-awn text-3xl text-black"></i>
+        </div>
+        <h2 class="text-3xl font-serif font-bold text-amber-400">Nonchi Aka</h2>
+        <p class="text-xs text-stone-400 mt-1 uppercase tracking-widest">Nonvoyxona yuklanmoqda...</p>
+    </div>
+
+    <!-- AUTH MODAL (LOGIN / REGISTER) -->
+    <div x-show="authModalOpen" x-transition.opacity class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div @click.away="authModalOpen = false" x-transition class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-amber-100 animate-fade">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h3 class="text-xl font-serif font-bold text-warm-900" x-text="authMode === 'login' ? 'Tizimga kirish' : 'Ro\'yxatdan o\'tish'"></h3>
+                    <p class="text-xs text-warm-500 mt-0.5">Buyurtma berish uchun ma'lumotlaringiz kerak</p>
+                </div>
+                <button @click="authModalOpen = false" class="w-9 h-9 rounded-2xl bg-amber-50 text-amber-800 hover:bg-amber-100 flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 bg-amber-50 p-1.5 rounded-2xl">
+                <button @click="authMode = 'login'" :class="authMode === 'login' ? 'bg-amber-600 text-white shadow-md' : 'text-warm-700'" class="py-2.5 rounded-xl font-bold text-xs transition">Kirish</button>
+                <button @click="authMode = 'register'" :class="authMode === 'register' ? 'bg-amber-600 text-white shadow-md' : 'text-warm-700'" class="py-2.5 rounded-xl font-bold text-xs transition">Ro'yxatdan o'tish</button>
+            </div>
+
+            <form @submit.prevent="handleAuth" class="space-y-4">
+                <div x-show="authMode === 'register'">
+                    <label class="block text-xs font-bold text-warm-700 mb-1">Ismingiz</label>
+                    <input type="text" x-model="authForm.name" placeholder="Masalan: MaTr1x" class="w-full bg-warm-50 px-4 py-3 rounded-2xl border border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-warm-700 mb-1">Telefon raqam</label>
+                    <input type="tel" x-model="authForm.phone" placeholder="+998 90 123-45-67" required class="w-full bg-warm-50 px-4 py-3 rounded-2xl border border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm">
+                </div>
+                <button type="submit" class="w-full py-4 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl shadow-lg shadow-amber-600/30 transition text-sm active:scale-95" x-text="authMode === 'login' ? 'Kirish' : 'Ro\'yxatdan o\'tish'"></button>
+            </form>
+        </div>
+    </div>
 
     <!-- HEADER / NAVIGATION -->
-    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-amber-100 shadow-sm">
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-amber-100 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
-                <!-- Logo -->
                 <a href="#" @click.prevent="activeTab = 'home'" class="flex items-center gap-3 group">
                     <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center text-white shadow-lg shadow-amber-500/30 group-hover:scale-105 transition">
                         <i class="fa-solid fa-wheat-awn text-2xl"></i>
@@ -73,7 +120,6 @@
                     </div>
                 </a>
 
-                <!-- Desktop Navigation -->
                 <nav class="hidden md:flex items-center gap-1 bg-amber-50/60 p-1.5 rounded-full border border-amber-100/80">
                     <button @click="activeTab = 'home'" :class="activeTab === 'home' ? 'bg-amber-600 text-white shadow-md' : 'text-warm-800 hover:text-amber-700 hover:bg-amber-100/50'" class="px-5 py-2 rounded-full text-sm font-semibold transition">Bosh sahifa</button>
                     <button @click="activeTab = 'products'" :class="activeTab === 'products' ? 'bg-amber-600 text-white shadow-md' : 'text-warm-800 hover:text-amber-700 hover:bg-amber-100/50'" class="px-5 py-2 rounded-full text-sm font-semibold transition">Mahsulotlar</button>
@@ -81,22 +127,21 @@
                     <button @click="activeTab = 'contact'" :class="activeTab === 'contact' ? 'bg-amber-600 text-white shadow-md' : 'text-warm-800 hover:text-amber-700 hover:bg-amber-100/50'" class="px-5 py-2 rounded-full text-sm font-semibold transition">Aloqa</button>
                 </nav>
 
-                <!-- Right Action Buttons -->
                 <div class="flex items-center gap-2 sm:gap-3">
-                    <!-- Telegram Bot Link Button -->
-                    <a :href="botUrl" target="_blank" class="p-3 rounded-2xl bg-sky-50 text-sky-600 hover:bg-sky-100 transition border border-sky-200/60 flex items-center gap-2 text-xs sm:text-sm font-bold">
-                        <i class="fa-brands fa-telegram text-lg"></i>
-                        <span class="hidden md:inline">Telegram Bot</span>
-                    </a>
+                    <template x-if="isLoggedIn">
+                        <div class="hidden sm:flex items-center gap-2 bg-amber-50 px-3 py-2 rounded-2xl border border-amber-200/60 text-xs font-bold text-amber-900">
+                            <i class="fa-solid fa-user-check text-amber-600"></i>
+                            <span x-text="currentUser.name"></span>
+                            <button @click="logout" class="ml-2 text-red-500 hover:text-red-700" title="Chiqish"><i class="fa-solid fa-right-from-bracket"></i></button>
+                        </div>
+                    </template>
 
-                    <!-- Cart Button -->
-                    <button @click="activeTab = 'cart'" class="relative p-3 rounded-2xl bg-amber-50 text-amber-800 hover:bg-amber-100 transition border border-amber-200/60 flex items-center gap-2">
+                    <button @click="activeTab = 'cart'" class="relative p-3 rounded-2xl bg-amber-50 text-amber-800 hover:bg-amber-100 transition border border-amber-200/60 flex items-center gap-2 active:scale-95">
                         <i class="fa-solid fa-basket-shopping text-lg"></i>
                         <span class="hidden sm:inline text-sm font-bold">Savat</span>
                         <span x-show="cartCount > 0" x-text="cartCount" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shadow-md animate-pulse"></span>
                     </button>
 
-                    <!-- Mobile Menu Button -->
                     <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-3 rounded-2xl bg-amber-50 text-amber-800 hover:bg-amber-100 transition border border-amber-200/60">
                         <i :class="mobileMenuOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars'" class="text-xl"></i>
                     </button>
@@ -104,24 +149,25 @@
             </div>
         </div>
 
-        <!-- Mobile Menu Dropdown -->
-        <div x-show="mobileMenuOpen" @click.away="mobileMenuOpen = false" class="md:hidden bg-white border-b border-amber-100 px-4 pt-2 pb-6 space-y-2 shadow-xl">
+        <div x-show="mobileMenuOpen" @click.away="mobileMenuOpen = false" x-transition class="md:hidden bg-white border-b border-amber-100 px-4 pt-2 pb-6 space-y-2 shadow-xl animate-fade">
+            <template x-if="isLoggedIn">
+                <div class="p-3 bg-amber-50 rounded-2xl flex items-center justify-between text-xs font-bold text-amber-900 mb-2">
+                    <span>👤 <span x-text="currentUser.name"></span></span>
+                    <button @click="logout" class="text-red-500">Chiqish</button>
+                </div>
+            </template>
             <button @click="activeTab = 'home'; mobileMenuOpen = false" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-warm-800 hover:bg-amber-50 hover:text-amber-700 transition">Bosh sahifa</button>
             <button @click="activeTab = 'products'; mobileMenuOpen = false" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-warm-800 hover:bg-amber-50 hover:text-amber-700 transition">Mahsulotlar</button>
             <button @click="activeTab = 'about'; mobileMenuOpen = false" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-warm-800 hover:bg-amber-50 hover:text-amber-700 transition">Biz haqimizda</button>
             <button @click="activeTab = 'contact'; mobileMenuOpen = false" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-warm-800 hover:bg-amber-50 hover:text-amber-700 transition">Aloqa</button>
-            <a :href="botUrl" target="_blank" class="block w-full text-center px-4 py-3 rounded-xl font-bold bg-sky-500 text-white transition mt-2">
-                <i class="fa-brands fa-telegram mr-2"></i> Telegram Botga o'tish
-            </a>
         </div>
     </header>
 
-    <!-- MAIN CONTENT CONTAINER -->
+    <!-- MAIN CONTENT -->
     <main class="min-h-[80vh] smooth-scroll-container">
 
-        <!-- 1. BOSH SAHIFA (HOME) -->
-        <section x-show="activeTab === 'home'" class="space-y-12 sm:space-y-20 pb-20">
-            <!-- Hero Banner -->
+        <!-- 1. BOSH SAHIFA -->
+        <section x-show="activeTab === 'home'" class="space-y-16 pb-20 animate-fade">
             <div class="relative overflow-hidden bg-gradient-to-br from-amber-950 via-amber-900 to-amber-800 text-white py-16 sm:py-28 rounded-b-[2.5rem] sm:rounded-b-[3rem] shadow-2xl">
                 <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#f59e0b_1px,transparent_1px)] [background-size:16px_16px]"></div>
                 <div class="absolute -right-20 -bottom-20 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl"></div>
@@ -130,20 +176,20 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                         <div class="space-y-6 text-center lg:text-left">
                             <div class="inline-flex items-center gap-2 bg-amber-500/20 border border-amber-400/30 px-4 py-2 rounded-full text-amber-300 text-xs sm:text-sm font-medium backdrop-blur-sm">
-                                <i class="fa-solid fa-fire text-amber-400 animate-bounce"></i> Har soatda tandirdan issiq nonlar!
+                                <i class="fa-solid fa-fire text-amber-400 animate-bounce"></i> Har soatda tandirdan issiq nonlar va somsalar!
                             </div>
                             <h1 class="text-3xl sm:text-5xl lg:text-6xl font-serif font-extrabold tracking-tight leading-tight">
                                 Har bir luqmada <span class="text-amber-400">an'anaviy</span> ta'm va mehr
                             </h1>
                             <p class="text-base sm:text-lg text-amber-100/90 max-w-xl mx-auto lg:mx-0">
-                                Tabiiy masalliqlar, asrlar osha kelayotgan retseptlar va olovli tandirda yopilgan milliy patirlar hamda issiq non mahsulotlari.
+                                Tabiiy masalliqlar, asrlar osha kelayotgan retseptlar va olovli tandirda yopilgan milliy patirlar, somsalar hamda shirinliklar.
                             </p>
                             <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-4">
-                                <button @click="activeTab = 'products'" class="w-full sm:w-auto px-6 py-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-2xl shadow-xl shadow-amber-600/30 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-3 whitespace-nowrap">
+                                <button @click="activeTab = 'products'" class="w-full sm:w-auto px-6 py-4 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-2xl shadow-xl shadow-amber-600/30 transition transform hover:-translate-y-0.5 active:scale-95 flex items-center justify-center gap-3 whitespace-nowrap">
                                     <span>Menuni ko'rish</span>
                                     <i class="fa-solid fa-arrow-right"></i>
                                 </button>
-                                <a :href="botUrl" target="_blank" class="w-full sm:w-auto px-6 py-4 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-2xl shadow-xl shadow-sky-600/30 transition flex items-center justify-center gap-2 whitespace-nowrap">
+                                <a :href="botUrl" target="_blank" class="w-full sm:w-auto px-6 py-4 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-2xl shadow-xl shadow-sky-600/30 transition flex items-center justify-center gap-2 whitespace-nowrap active:scale-95">
                                     <i class="fa-brands fa-telegram text-xl"></i>
                                     <span>Botga o'tish</span>
                                 </a>
@@ -165,41 +211,41 @@
             </div>
 
             <!-- Features Bar -->
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-10 relative z-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-                    <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-xl shadow-amber-900/5 border border-amber-100 flex items-center gap-4">
-                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
+                    <div class="bg-white p-6 rounded-3xl shadow-xl shadow-amber-900/5 border border-amber-100 flex items-center gap-4 hover:scale-[1.02] transition">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl flex-shrink-0">
                             <i class="fa-solid fa-seedling"></i>
                         </div>
                         <div>
-                            <h4 class="font-bold text-warm-900 text-sm sm:text-base">100% Tabiiy</h4>
+                            <h4 class="font-bold text-warm-900 text-base">100% Tabiiy</h4>
                             <p class="text-xs text-warm-500 mt-0.5">Kimyoviy qo'shimchalarsiz un</p>
                         </div>
                     </div>
-                    <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-xl shadow-amber-900/5 border border-amber-100 flex items-center gap-4">
-                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
+                    <div class="bg-white p-6 rounded-3xl shadow-xl shadow-amber-900/5 border border-amber-100 flex items-center gap-4 hover:scale-[1.02] transition">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl flex-shrink-0">
                             <i class="fa-solid fa-fire-burner"></i>
                         </div>
                         <div>
-                            <h4 class="font-bold text-warm-900 text-sm sm:text-base">Issiq Tandir</h4>
+                            <h4 class="font-bold text-warm-900 text-base">Issiq Tandir</h4>
                             <p class="text-xs text-warm-500 mt-0.5">Haqiqiy o'tin olovida pishiriladi</p>
                         </div>
                     </div>
-                    <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-xl shadow-amber-900/5 border border-amber-100 flex items-center gap-4">
-                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
+                    <div class="bg-white p-6 rounded-3xl shadow-xl shadow-amber-900/5 border border-amber-100 flex items-center gap-4 hover:scale-[1.02] transition">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl flex-shrink-0">
                             <i class="fa-solid fa-truck-fast"></i>
                         </div>
                         <div>
-                            <h4 class="font-bold text-warm-900 text-sm sm:text-base">Tezkor Yetkazish</h4>
+                            <h4 class="font-bold text-warm-900 text-base">Tezkor Yetkazish</h4>
                             <p class="text-xs text-warm-500 mt-0.5">Issiqligini yo'qotmagan holda</p>
                         </div>
                     </div>
-                    <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-xl shadow-amber-900/5 border border-amber-100 flex items-center gap-4">
-                        <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
+                    <div class="bg-white p-6 rounded-3xl shadow-xl shadow-amber-900/5 border border-amber-100 flex items-center gap-4 hover:scale-[1.02] transition">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl flex-shrink-0">
                             <i class="fa-solid fa-award"></i>
                         </div>
                         <div>
-                            <h4 class="font-bold text-warm-900 text-sm sm:text-base">Ajoyib Ta'm</h4>
+                            <h4 class="font-bold text-warm-900 text-base">Ajoyib Ta'm</h4>
                             <p class="text-xs text-warm-500 mt-0.5">Tajribali usta nonvoylar</p>
                         </div>
                     </div>
@@ -211,7 +257,7 @@
                 <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
                     <div>
                         <span class="text-amber-600 font-bold tracking-wider uppercase text-xs">Saralangan mahsulotlar</span>
-                        <h2 class="text-2xl sm:text-4xl font-serif font-bold text-warm-900 mt-1">Eng mashhur nonlarimiz</h2>
+                        <h2 class="text-2xl sm:text-4xl font-serif font-bold text-warm-900 mt-1">Eng mashhur non va somsalarimiz</h2>
                     </div>
                     <button @click="activeTab = 'products'" class="text-amber-700 hover:text-amber-800 font-bold flex items-center gap-2 group text-sm sm:text-base">
                         <span>Barcha mahsulotlar</span>
@@ -226,15 +272,15 @@
                                 <img :src="product.image" :alt="product.name" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                                 <span class="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-amber-800 shadow-md" x-text="product.categoryName"></span>
                             </div>
-                            <div class="p-5 sm:p-6 flex flex-col flex-grow space-y-4">
-                                <h3 class="text-lg sm:text-xl font-serif font-bold text-warm-900" x-text="product.name"></h3>
-                                <p class="text-xs sm:text-sm text-warm-600 line-clamp-2" x-text="product.desc"></p>
+                            <div class="p-6 flex flex-col flex-grow space-y-4">
+                                <h3 class="text-xl font-serif font-bold text-warm-900" x-text="product.name"></h3>
+                                <p class="text-sm text-warm-600 line-clamp-2" x-text="product.desc"></p>
                                 <div class="mt-auto pt-4 flex items-center justify-between border-t border-amber-50">
                                     <div>
                                         <span class="text-xs text-warm-400 block">Narxi</span>
-                                        <span class="text-base sm:text-lg font-extrabold text-amber-700" x-text="product.price.toLocaleString() + ' so\'m'"></span>
+                                        <span class="text-lg font-extrabold text-amber-700" x-text="product.price.toLocaleString() + ' so\'m'"></span>
                                     </div>
-                                    <button @click="addToCart(product)" class="px-4 sm:px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-amber-600/20 transition flex items-center gap-2 active:scale-95">
+                                    <button @click="addToCart(product)" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-xl shadow-md shadow-amber-600/20 transition flex items-center gap-2 active:scale-95">
                                         <i class="fa-solid fa-plus text-xs"></i>
                                         <span>Savatga</span>
                                     </button>
@@ -244,26 +290,54 @@
                     </template>
                 </div>
             </div>
+
+            <!-- Customer Reviews Section -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pt-10">
+                <div class="text-center space-y-2">
+                    <span class="text-amber-600 font-bold tracking-wider uppercase text-xs">Mijozlar fikri</span>
+                    <h2 class="text-2xl sm:text-4xl font-serif font-bold text-warm-900">Biz haqimizda nima deyishadi?</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-3xl border border-amber-100 shadow-md space-y-4">
+                        <div class="flex text-amber-500 gap-1 text-sm"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        <p class="text-sm text-warm-600">"Tandir somsalar va nonlari juda yumshoq va mazali. Oila a'zolarimiz bilan doim Nonchi Akadan buyurtma beramiz!"</p>
+                        <div class="font-bold text-xs text-warm-900">— Alisher B.</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl border border-amber-100 shadow-md space-y-4">
+                        <div class="flex text-amber-500 gap-1 text-sm"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        <p class="text-sm text-warm-600">"Sedanalik patirlari va qatlamalari o'zgacha. Telegram bot orqali buyurtma berish juda qulay ekan."</p>
+                        <div class="font-bold text-xs text-warm-900">— Dilshod K.</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl border border-amber-100 shadow-md space-y-4">
+                        <div class="flex text-amber-500 gap-1 text-sm"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
+                        <p class="text-sm text-warm-600">"Yetkazib berish juda tez ishlaydi. Non issiqligicha yetib keldi. Rahmat!"</p>
+                        <div class="font-bold text-xs text-warm-900">— Malika S.</div>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <!-- 2. MAHSULOTLAR (PRODUCTS) -->
-        <section x-show="activeTab === 'products'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
+        <section x-show="activeTab === 'products'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 animate-fade">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
                 <div>
                     <span class="text-amber-600 font-bold tracking-wider uppercase text-xs">Mahsulotlar katalogi</span>
-                    <h2 class="text-2xl sm:text-4xl font-serif font-bold text-warm-900 mt-1">Mazali non mahsulotlarimiz</h2>
+                    <h2 class="text-2xl sm:text-4xl font-serif font-bold text-warm-900 mt-1">Barcha non va taomlarimiz</h2>
                 </div>
                 <div class="relative w-full md:w-80">
                     <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-warm-400"></i>
-                    <input type="text" x-model="searchQuery" placeholder="Nonni qidirish..." class="w-full bg-white pl-11 pr-4 py-3 rounded-2xl border border-amber-200/80 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-sm text-sm">
+                    <input type="text" x-model="searchQuery" placeholder="Mahsulotni qidirish..." class="w-full bg-white pl-11 pr-4 py-3 rounded-2xl border border-amber-200/80 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-sm text-sm">
                 </div>
             </div>
 
             <!-- Category Filter Buttons -->
             <div class="flex flex-wrap gap-2 pb-2">
-                <button @click="selectedCategory = 'all'" :class="selectedCategory === 'all' ? 'bg-amber-600 text-white shadow-md' : 'bg-white text-warm-800 hover:bg-amber-50 border border-amber-200/60'" class="px-4 sm:px-5 py-2 rounded-2xl font-semibold text-xs sm:text-sm transition">Barchasi</button>
-                <button @click="selectedCategory = 'tandir'" :class="selectedCategory === 'tandir' ? 'bg-amber-600 text-white shadow-md' : 'bg-white text-warm-800 hover:bg-amber-50 border border-amber-200/60'" class="px-4 sm:px-5 py-2 rounded-2xl font-semibold text-xs sm:text-sm transition">Tandir nonlar</button>
-                <button @click="selectedCategory = 'patir'" :class="selectedCategory === 'patir' ? 'bg-amber-600 text-white shadow-md' : 'bg-white text-warm-800 hover:bg-amber-50 border border-amber-200/60'" class="px-4 sm:px-5 py-2 rounded-2xl font-semibold text-xs sm:text-sm transition">Patirlar</button>
+                <button @click="selectedCategory = 'all'" :class="selectedCategory === 'all' ? 'bg-amber-600 text-white shadow-md' : 'bg-white text-warm-800 hover:bg-amber-50 border border-amber-200/60'" class="px-5 py-2 rounded-2xl font-semibold text-sm transition">Barchasi</button>
+                <button @click="selectedCategory = 'tandir'" :class="selectedCategory === 'tandir' ? 'bg-amber-600 text-white shadow-md' : 'bg-white text-warm-800 hover:bg-amber-50 border border-amber-200/60'" class="px-5 py-2 rounded-2xl font-semibold text-sm transition">Tandir nonlar</button>
+                <button @click="selectedCategory = 'patir'" :class="selectedCategory === 'patir' ? 'bg-amber-600 text-white shadow-md' : 'bg-white text-warm-800 hover:bg-amber-50 border border-amber-200/60'" class="px-5 py-2 rounded-2xl font-semibold text-sm transition">Patirlar</button>
+                <button @click="selectedCategory = 'somsa'" :class="selectedCategory === 'somsa' ? 'bg-amber-600 text-white shadow-md' : 'bg-white text-warm-800 hover:bg-amber-50 border border-amber-200/60'" class="px-5 py-2 rounded-2xl font-semibold text-sm transition">Tandir somsalar</button>
+                <button @click="selectedCategory = 'shirinlik'" :class="selectedCategory === 'shirinlik' ? 'bg-amber-600 text-white shadow-md' : 'bg-white text-warm-800 hover:bg-amber-50 border border-amber-200/60'" class="px-5 py-2 rounded-2xl font-semibold text-sm transition">Shirinliklar</button>
+                <button @click="selectedCategory = 'ichimlik'" :class="selectedCategory === 'ichimlik' ? 'bg-amber-600 text-white shadow-md' : 'bg-white text-warm-800 hover:bg-amber-50 border border-amber-200/60'" class="px-5 py-2 rounded-2xl font-semibold text-sm transition">Ichimliklar</button>
             </div>
 
             <!-- Products Grid -->
@@ -274,15 +348,15 @@
                             <img :src="product.image" :alt="product.name" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                             <span class="absolute top-4 left-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-amber-800 shadow-md" x-text="product.categoryName"></span>
                         </div>
-                        <div class="p-5 sm:p-6 flex flex-col flex-grow space-y-4">
-                            <h3 class="text-lg sm:text-xl font-serif font-bold text-warm-900" x-text="product.name"></h3>
-                            <p class="text-xs sm:text-sm text-warm-600" x-text="product.desc"></p>
+                        <div class="p-6 flex flex-col flex-grow space-y-4">
+                            <h3 class="text-xl font-serif font-bold text-warm-900" x-text="product.name"></h3>
+                            <p class="text-sm text-warm-600" x-text="product.desc"></p>
                             <div class="mt-auto pt-4 flex items-center justify-between border-t border-amber-50">
                                 <div>
                                     <span class="text-xs text-warm-400 block">Narxi</span>
-                                    <span class="text-base sm:text-lg font-extrabold text-amber-700" x-text="product.price.toLocaleString() + ' so\'m'"></span>
+                                    <span class="text-lg font-extrabold text-amber-700" x-text="product.price.toLocaleString() + ' so\'m'"></span>
                                 </div>
-                                <button @click="addToCart(product)" class="px-4 sm:px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-amber-600/20 transition flex items-center gap-2 active:scale-95">
+                                <button @click="addToCart(product)" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm rounded-xl shadow-md shadow-amber-600/20 transition flex items-center gap-2 active:scale-95">
                                     <i class="fa-solid fa-plus text-xs"></i>
                                     <span>Savatga</span>
                                 </button>
@@ -291,93 +365,118 @@
                     </div>
                 </template>
             </div>
-
-            <!-- Empty State -->
-            <div x-show="filteredProducts.length === 0" class="text-center py-16 bg-white rounded-3xl border border-amber-100 shadow-sm space-y-4">
-                <div class="w-16 h-16 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto text-2xl">
-                    <i class="fa-solid fa-box-open"></i>
-                </div>
-                <h3 class="text-xl font-bold text-warm-900">Mahsulot topilmadi</h3>
-                <p class="text-warm-500 text-sm max-w-sm mx-auto">Qidiruv so'rovingiz bo'yicha hech qanday mahsulot topilmadi.</p>
-            </div>
         </section>
 
-        <!-- 3. BIZ HAQIMIZDA (ABOUT) -->
-        <section x-show="activeTab === 'about'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12 sm:space-y-20">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <!-- 3. BIZ HAQIMIZDA -->
+        <section x-show="activeTab === 'about'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-16 animate-fade">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="space-y-6">
                     <span class="text-amber-600 font-bold tracking-wider uppercase text-xs">Tariximiz va qadriyatlarimiz</span>
-                    <h2 class="text-2xl sm:text-4xl lg:text-5xl font-serif font-extrabold text-warm-900 leading-tight">
+                    <h2 class="text-3xl sm:text-5xl font-serif font-extrabold text-warm-900 leading-tight">
                         Nonchi Aka — sifat va halollik belgisi
                     </h2>
-                    <p class="text-sm sm:text-base text-warm-600 leading-relaxed">
-                        "Nonchi Aka" nonvoyxonasi o'zining issiq va xushbo'y tandir nonlari bilan xaridorlarga xizmat ko'rsatib kelmoqda. Biz har bir nonni o'z ishining ustalari tomonidan maxsus retseptlar asosida yopamiz.
+                    <p class="text-base text-warm-600 leading-relaxed">
+                        "Nonchi Aka" nonvoyxonasi o'zining issiq va xushbo'y tandir nonlari, tansiq somsalar hamda milliy pishiriqlari bilan xaridorlarga xizmat ko'rsatib kelmoqda. Biz har bir mahsulotni o'z ishining ustalari tomonidan maxsus retseptlar va tabiiy masalliqlar asosida tayyorlaymiz.
                     </p>
-                    <div class="grid grid-cols-3 gap-4 sm:gap-6 pt-4 border-t border-amber-100">
+                    <div class="grid grid-cols-3 gap-6 pt-4 border-t border-amber-100">
                         <div>
-                            <span class="block text-2xl sm:text-3xl font-extrabold text-amber-700 font-serif">10+</span>
+                            <span class="block text-3xl font-extrabold text-amber-700 font-serif">10+</span>
                             <span class="text-xs text-warm-500 mt-1 block">Yillik tajriba</span>
                         </div>
                         <div>
-                            <span class="block text-2xl sm:text-3xl font-extrabold text-amber-700 font-serif">10k+</span>
+                            <span class="block text-3xl font-extrabold text-amber-700 font-serif">10k+</span>
                             <span class="text-xs text-warm-500 mt-1 block">Mamnun mijozlar</span>
                         </div>
                         <div>
-                            <span class="block text-2xl sm:text-3xl font-extrabold text-amber-700 font-serif">15+</span>
-                            <span class="text-xs text-warm-500 mt-1 block">Non turlari</span>
+                            <span class="block text-3xl font-extrabold text-amber-700 font-serif">25+</span>
+                            <span class="text-xs text-warm-500 mt-1 block">Mahsulot turlari</span>
                         </div>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <img src="./png.3.jpg" alt="Sedanalik non" class="w-full h-48 sm:h-56 object-cover rounded-3xl shadow-xl">
-                    <img src="./png.1.webp" alt="Katlama patir" class="w-full h-48 sm:h-56 object-cover rounded-3xl shadow-xl pt-6 sm:pt-8">
+                    <img src="./png.3.jpg" alt="Sedanalik non" class="w-full h-56 object-cover rounded-3xl shadow-xl">
+                    <img src="./png.1.webp" alt="Katlama patir" class="w-full h-56 object-cover rounded-3xl shadow-xl pt-8">
+                </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="max-w-3xl mx-auto space-y-6 pt-8">
+                <h3 class="text-2xl font-serif font-bold text-center text-warm-900">Ko'p beriladigan savollar</h3>
+                <div class="space-y-4">
+                    <div class="bg-white p-6 rounded-3xl border border-amber-100 shadow-sm">
+                        <h4 class="font-bold text-warm-900 mb-1">Non va somsalar har doim issiq bo'ladimi?</h4>
+                        <p class="text-sm text-warm-600">Ha, tandirlarimiz har soatda yangi o'tin olovida yoqilib, tinimsiz issiq non va somsalar yopib turiladi.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl border border-amber-100 shadow-sm">
+                        <h4 class="font-bold text-warm-900 mb-1">Yetkazib berish xizmati bormi?</h4>
+                        <p class="text-sm text-warm-600">Albatta! Buyurtmangiz qabul qilingandan so'ng shahrimiz bo'ylab tezkor yetkazib beriladi.</p>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- 4. ALOQA (CONTACT) -->
-        <section x-show="activeTab === 'contact'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 sm:space-y-12">
+        <!-- 4. ALOQA -->
+        <section x-show="activeTab === 'contact'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12 animate-fade">
             <div class="text-center max-w-2xl mx-auto space-y-3">
                 <span class="text-amber-600 font-bold tracking-wider uppercase text-xs">Bog'lanish</span>
                 <h2 class="text-2xl sm:text-4xl font-serif font-bold text-warm-900">Biz bilan bog'laning</h2>
-                <p class="text-warm-500 text-xs sm:text-sm">Savollaringiz bormi yoki buyurtma bermoqchimisiz? Bizga qo'ng'iroq qiling!</p>
+                <p class="text-warm-500 text-sm">Savollaringiz bormi yoki buyurtma bermoqchimisiz? Biz har doim aloqadamiz!</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-3xl mx-auto">
-                <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-xl shadow-amber-900/5 border border-amber-100 flex items-start gap-4">
-                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+                <div class="bg-white p-6 rounded-3xl shadow-xl border border-amber-100 flex flex-col items-center text-center space-y-3 hover:scale-105 transition">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl">
                         <i class="fa-solid fa-phone"></i>
                     </div>
-                    <div>
-                        <h4 class="font-bold text-warm-900 text-base sm:text-lg">Telefon raqamlarimiz</h4>
-                        <p class="text-xs sm:text-sm text-warm-600 mt-2 space-y-1 font-semibold">
-                            <a href="tel:+998909229920" class="hover:text-amber-600 block">+998 (90) 922-99-20</a>[cite: 1]
-                            <a href="tel:+998909228820" class="hover:text-amber-600 block">+998 (90) 922-88-20</a>[cite: 1]
-                        </p>
+                    <h4 class="font-bold text-warm-900 text-lg">Telefon raqamlar</h4>
+                    <div class="text-sm text-warm-600 font-semibold space-y-1">
+                        <a href="tel:+998909229920" class="hover:text-amber-600 block">+998 (90) 922-99-20</a>[cite: 1]
+                        <a href="tel:+998909228820" class="hover:text-amber-600 block">+998 (90) 922-88-20</a>[cite: 1]
                     </div>
                 </div>
-                <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-xl shadow-amber-900/5 border border-amber-100 flex items-start gap-4">
-                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
-                        <i class="fa-solid fa-store"></i>
+
+                <div class="bg-white p-6 rounded-3xl shadow-xl border border-amber-100 flex flex-col items-center text-center space-y-3 hover:scale-105 transition">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl">
+                        <i class="fa-solid fa-clock"></i>
                     </div>
-                    <div>
-                        <h4 class="font-bold text-warm-900 text-base sm:text-lg">Nonvoyxona</h4>
-                        <p class="text-xs sm:text-sm text-warm-600 mt-2">
-                            Har kuni 06:00 dan 22:00 gacha ochiq. Issiq tandir nonlar har soatda yopiladi!
-                        </p>
+                    <h4 class="font-bold text-warm-900 text-lg">Ish tartibi</h4>
+                    <p class="text-sm text-warm-600">
+                        Har kuni: <b>06:00 - 22:00</b><br>
+                        <span class="text-xs text-amber-600 font-medium">Issiq non har soatda yopiladi</span>
+                    </p>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl shadow-xl border border-amber-100 flex flex-col items-center text-center space-y-3 hover:scale-105 transition">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <h4 class="font-bold text-warm-900 text-lg">Bizning manzil</h4>
+                    <p class="text-sm text-warm-600">
+                        Toshkent shahri, Yunusobod tumani, Markaziy nonvoyxona
+                    </p>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl shadow-xl border border-amber-100 flex flex-col items-center text-center space-y-3 hover:scale-105 transition">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </div>
+                    <h4 class="font-bold text-warm-900 text-lg">Ijtimoiy tarmoqlar</h4>
+                    <div class="flex gap-3 text-lg pt-1">
+                        <a :href="botUrl" target="_blank" class="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 hover:bg-sky-500 hover:text-white flex items-center justify-center transition"><i class="fa-brands fa-telegram"></i></a>
+                        <a href="#" class="w-9 h-9 rounded-xl bg-pink-50 text-pink-600 hover:bg-pink-500 hover:text-white flex items-center justify-center transition"><i class="fa-brands fa-instagram"></i></a>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 5. SAVAT (CART) -->
-        <section x-show="activeTab === 'cart'" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8">
+        <!-- 5. SAVAT -->
+        <section x-show="activeTab === 'cart'" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 animate-fade">
             <div class="text-center space-y-2">
                 <h2 class="text-2xl sm:text-3xl font-serif font-bold text-warm-900">Sizning savatingiz</h2>
-                <p class="text-warm-500 text-xs sm:text-sm">Tanlangan mahsulotlar ro'yxati</p>
+                <p class="text-warm-500 text-sm">Tanlangan mahsulotlar ro'yxati</p>
             </div>
 
-            <div class="bg-white rounded-3xl shadow-xl border border-amber-100 p-5 sm:p-8 space-y-6">
+            <div class="bg-white rounded-3xl shadow-xl border border-amber-100 p-6 sm:p-8 space-y-6">
                 <template x-if="cart.length === 0">
                     <div class="text-center py-12 space-y-3">
                         <div class="w-16 h-16 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto text-2xl">
@@ -394,27 +493,27 @@
                         <div class="divide-y divide-amber-100">
                             <template x-for="item in cart" :key="item.id">
                                 <div class="py-4 flex items-center justify-between gap-4">
-                                    <div class="flex items-center gap-3 sm:gap-4">
-                                        <img :src="item.image" class="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-2xl border border-amber-100">
+                                    <div class="flex items-center gap-4">
+                                        <img :src="item.image" class="w-16 h-16 object-cover rounded-2xl border border-amber-100">
                                         <div>
-                                            <h4 class="font-bold text-warm-900 text-sm sm:text-base" x-text="item.name"></h4>
-                                            <span class="text-xs sm:text-sm text-amber-700 font-semibold" x-text="item.price.toLocaleString() + ' so\'m'"></span>
+                                            <h4 class="font-bold text-warm-900 text-base" x-text="item.name"></h4>
+                                            <span class="text-sm text-amber-700 font-semibold" x-text="item.price.toLocaleString() + ' so\'m'"></span>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-2 sm:gap-3">
-                                        <button @click="decreaseQuantity(item)" class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-100 text-amber-800 font-bold flex items-center justify-center hover:bg-amber-200 text-xs sm:text-sm">-</button>
-                                        <span class="font-bold text-warm-900 text-sm sm:text-base" x-text="item.quantity"></span>
-                                        <button @click="increaseQuantity(item)" class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-100 text-amber-800 font-bold flex items-center justify-center hover:bg-amber-200 text-xs sm:text-sm">+</button>
-                                        <button @click="removeFromCart(item)" class="text-red-500 hover:text-red-700 ml-2 sm:ml-4 text-xs sm:text-sm"><i class="fa-solid fa-trash"></i></button>
+                                    <div class="flex items-center gap-3">
+                                        <button @click="decreaseQuantity(item)" class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 font-bold flex items-center justify-center hover:bg-amber-200">-</button>
+                                        <span class="font-bold text-warm-900" x-text="item.quantity"></span>
+                                        <button @click="increaseQuantity(item)" class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 font-bold flex items-center justify-center hover:bg-amber-200">+</button>
+                                        <button @click="removeFromCart(item)" class="text-red-500 hover:text-red-700 ml-4"><i class="fa-solid fa-trash"></i></button>
                                     </div>
                                 </div>
                             </template>
                         </div>
                         <div class="pt-6 border-t border-amber-200 flex items-center justify-between">
-                            <span class="text-base sm:text-lg font-bold text-warm-900">Jami summa:</span>
-                            <span class="text-xl sm:text-2xl font-extrabold text-amber-700" x-text="cartTotal.toLocaleString() + ' so\'m'"></span>
+                            <span class="text-lg font-bold text-warm-900">Jami summa:</span>
+                            <span class="text-2xl font-extrabold text-amber-700" x-text="cartTotal.toLocaleString() + ' so\'m'"></span>
                         </div>
-                        <button @click="checkout" class="w-full py-4 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl shadow-xl shadow-amber-600/30 transition text-center text-sm sm:text-base">Buyurtmani rasmiylashtirish</button>
+                        <button @click="checkout" class="w-full py-4 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl shadow-xl shadow-amber-600/30 transition text-center text-base active:scale-95">Buyurtmani rasmiylashtirish</button>
                     </div>
                 </template>
             </div>
@@ -422,99 +521,85 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="bg-amber-950 text-amber-100 py-10 sm:py-12 mt-12 sm:mt-20 rounded-t-[2.5rem] sm:rounded-t-[3rem]">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
-            <h3 class="text-xl sm:text-2xl font-serif font-bold text-white">Nonchi Aka Nonvoyxonasi</h3>
-            <p class="text-xs sm:text-sm text-amber-200/80">Har bir xonadonga issiq va barokatli nonlar ulashamiz.</p>
-            <div class="pt-2">
-                <a :href="botUrl" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 bg-sky-500/20 border border-sky-400/30 text-sky-300 rounded-full text-xs font-semibold hover:bg-sky-500/30 transition">
-                    <i class="fa-brands fa-telegram text-base"></i> Telegram Botimizga ulaning
-                </a>
-            </div>
-            <div class="pt-4 border-t border-amber-900 text-xs text-amber-400">
-                &copy; 2026 Nonchi Aka. Barcha huquqlar himoyalangan.
-            </div>
+    <footer class="bg-amber-950 text-amber-100 py-12 mt-20 rounded-t-[3rem]">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-4">
+            <h3 class="text-2xl font-serif font-bold text-amber-400">Nonchi Aka Nonvoyxonasi</h3>
+            <p class="text-sm text-amber-200/80">Har soatda issiq tandir nonlar va milliy patirlar.</p>
+            <p class="text-xs text-amber-400/60 pt-4 border-t border-amber-900">© 2026 Nonchi Aka. Barcha huquqlar himoyalangan.</p>
         </div>
     </footer>
 
-    <!-- Alpine.js Application Logic -->
+    <!-- ALPINE.JS SCRIPT -->
     <script>
         function bakeryApp() {
             return {
+                isLoading: true,
                 activeTab: 'home',
                 mobileMenuOpen: false,
                 searchQuery: '',
                 selectedCategory: 'all',
-                botUsername: 'nonchi_aka_nonvoy_bot', // Botingizning aniq username'i
-                get botUrl() {
-                    return `https://t.me/${this.botUsername}`;
-                },
-                cart: [],
+                botUrl: 'https://t.me/nonchi_aka_nonvoy_bot',
+                
+                isLoggedIn: false,
+                authModalOpen: false,
+                authMode: 'login',
+                authForm: { name: '', phone: '' },
+                currentUser: { name: '', phone: '' },
+
+                // Kengaytirilgan ko'plab mahsulotlar ro'yxati
                 products: [
-                    { 
-                        id: 1, 
-                        name: "Qarsildoq Tandir Patir", 
-                        category: 'patir', 
-                        categoryName: 'Patir', 
-                        price: 6000, 
-                        desc: "Haqiqiy o'tin olovida pishirilgan maxsus qarsildoq tandir patir.", 
-                        image: "./png.1.webp" 
-                    },
-                    { 
-                        id: 2, 
-                        name: "Issiq Tandir Noni", 
-                        category: 'tandir', 
-                        categoryName: 'Tandir non', 
-                        price: 4500, 
-                        desc: "Har soatda tandirdan uziladigan, issiq va xushbo'y milliy tandir noni.", 
-                        image: "./png.2.jpg" 
-                    },
-                    { 
-                        id: 3, 
-                        name: "Sedanalik Maxsus Patir", 
-                        category: 'patir', 
-                        categoryName: 'Patir', 
-                        price: 8000, 
-                        desc: "Sedana va kunjut sepib xushbo'y qilib pishirilgan mazali patir.", 
-                        image: "./png.3.jpg" 
-                    },
-                    { 
-                        id: 4, 
-                        name: "Lochira va Katlama Patir", 
-                        category: 'patir', 
-                        categoryName: 'Patir', 
-                        price: 10000, 
-                        desc: "Sariyog'li, serqatmoli va og'izda eriydigan to'qimdor loyiha patiri.", 
-                        image: "./png.2.jpg" 
-                    }
+                    { id: 1, name: 'Tandir Non', category: 'tandir', categoryName: 'Tandir non', price: 5000, desc: 'Olovli tandirda yopilgan klassik issiq non.', image: './png.2.jpg' },
+                    { id: 2, name: 'Sedanalik Patir', category: 'patir', categoryName: 'Patirlar', price: 8000, desc: 'Sedana sepilgan xushbo\'y va yumshoq patir.', image: './png.3.jpg' },
+                    { id: 3, name: 'Qatlama Patir', category: 'patir', categoryName: 'Patirlar', price: 10000, desc: 'Qat-qat bo\'lib pishirilgan saryog\'li patir.', image: './png.1.webp' },
+                    { id: 4, name: 'Tandir Somsa (Go\'shtli)', category: 'somsa', categoryName: 'Tandir somsalar', price: 9000, desc: 'Haqiqiy qo\'y go\'shti va piyoz solingan tansiq somsa.', image: './png.2.jpg' },
+                    { id: 5, name: 'Tandir Somsa (Qovoqli)', category: 'somsa', categoryName: 'Tandir somsalar', price: 7000, desc: 'Mavsumiy qovoq va sariyog\'dan tayyorlangan somsa.', image: './png.3.jpg' },
+                    { id: 6, name: 'Farg\'ona Patiri', category: 'patir', categoryName: 'Patirlar', price: 12000, desc: 'Maxsus Farg\'ona uslubidagi yirik patir.', image: './png.1.webp' },
+                    { id: 7, name: 'Qandolat Bulochka', category: 'shirinlik', categoryName: 'Shirinliklar', price: 6000, desc: 'Shakar upasi sepilgan shirin bulochka.', image: './png.2.jpg' },
+                    { id: 8, name: 'Asalli Boirsoq', category: 'shirinlik', categoryName: 'Shirinliklar', price: 15000, desc: 'Milliy shirin boirsoq kichik qutida.', image: './png.3.jpg' },
+                    { id: 9, name: 'Qora Choy (Limon bilan)', category: 'ichimlik', categoryName: 'Ichimliklar', price: 3000, desc: 'Issiq va xushbo\'y damlangan qora choy.', image: './png.1.webp' },
+                    { id: 10, name: 'Ayron', category: 'ichimlik', categoryName: 'Ichimliklar', price: 4000, desc: 'Salqin va mazali milliy sutli ichimlik.', image: './png.2.jpg' }
                 ],
+                cart: [],
+
+                initApp() {
+                    setTimeout(() => {
+                        this.isLoading = false;
+                    }, 800);
+
+                    let savedUser = localStorage.getItem('bakery_user');
+                    if (savedUser) {
+                        this.currentUser = JSON.parse(savedUser);
+                        this.isLoggedIn = true;
+                    }
+                },
+
+                handleAuth() {
+                    if (!this.authForm.phone) return;
+                    if (this.authMode === 'register' && !this.authForm.name) {
+                        this.authForm.name = 'Mijoz';
+                    }
+                    this.currentUser = {
+                        name: this.authForm.name || 'Mijoz',
+                        phone: this.authForm.phone
+                    };
+                    this.isLoggedIn = true;
+                    localStorage.setItem('bakery_user', JSON.stringify(this.currentUser));
+                    this.authModalOpen = false;
+                    this.checkout();
+                },
+
+                logout() {
+                    this.isLoggedIn = false;
+                    this.currentUser = { name: '', phone: '' };
+                    localStorage.removeItem('bakery_user');
+                },
+
                 get filteredProducts() {
                     return this.products.filter(p => {
-                        const matchesSearch = p.name.toLowerCase().includes(this.searchQuery.toLowerCase());
-                        const matchesCategory = this.selectedCategory === 'all' || p.category === this.selectedCategory;
-                        return matchesSearch && matchesCategory;
+                        let matchesCategory = this.selectedCategory === 'all' || p.category === this.selectedCategory;
+                        let matchesSearch = p.name.toLowerCase().includes(this.searchQuery.toLowerCase());
+                        return matchesCategory && matchesSearch;
                     });
-                },
-                addToCart(product) {
-                    const existingItem = this.cart.find(item => item.id === product.id);
-                    if (existingItem) {
-                        existingItem.quantity++;
-                    } else {
-                        this.cart.push({ ...product, quantity: 1 });
-                    }
-                },
-                increaseQuantity(item) {
-                    item.quantity++;
-                },
-                decreaseQuantity(item) {
-                    if (item.quantity > 1) {
-                        item.quantity--;
-                    } else {
-                        this.removeFromCart(item);
-                    }
-                },
-                removeFromCart(item) {
-                    this.cart = this.cart.filter(p => p.id !== item.id);
                 },
                 get cartCount() {
                     return this.cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -522,21 +607,41 @@
                 get cartTotal() {
                     return this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
                 },
+                addToCart(product) {
+                    let existing = this.cart.find(item => item.id === product.id);
+                    if (existing) {
+                        existing.quantity++;
+                    } else {
+                        this.cart.push({ ...product, quantity: 1 });
+                    }
+                },
+                increaseQuantity(item) { item.quantity++; },
+                decreaseQuantity(item) {
+                    if (item.quantity > 1) item.quantity--;
+                    else this.removeFromCart(item);
+                },
+                removeFromCart(item) {
+                    this.cart = this.cart.filter(p => p.id !== item.id);
+                },
                 checkout() {
                     if (this.cart.length === 0) return;
 
-                    let orderText = "🛒 Yangi buyurtma:\n\n";
-                    this.cart.forEach(item => {
-                        orderText += `• ${item.name} x ${item.quantity} = ${(item.price * item.quantity).toLocaleString()} so'm\n`;
-                    });
-                    orderText += `\n💰 Jami: ${this.cartTotal.toLocaleString()} so'm`;
+                    if (!this.isLoggedIn) {
+                        this.authModalOpen = true;
+                        return;
+                    }
 
-                    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
-                        const tg = window.Telegram.WebApp;
-                        tg.sendData(orderText);
-                        tg.close();
+                    let orderText = `🛒 Yangi buyurtma!\n\n👤 Mijoz: ${this.currentUser.name}\n📞 Tel: ${this.currentUser.phone}\n\n`;
+                    this.cart.forEach(i => {
+                        orderText += `- ${i.name} x ${i.quantity} = ${(i.price * i.quantity).toLocaleString()} so'm\n`;
+                    });
+                    orderText += `\nJami: ${this.cartTotal.toLocaleString()} so'm`;
+                    
+                    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.sendData) {
+                        window.Telegram.WebApp.sendData(orderText);
                     } else {
-                        alert("Buyurtma muvaffaqiyatli tayyorlandi! (Telegram ichida botga yuboriladi):\n\n" + orderText);
+                        alert("Buyurtma muvaffaqiyatli rasmiylashtirildi! Telegram botga yuborilmoqda...");
+                        window.location.href = this.botUrl + "?start=order";
                     }
                 }
             }
