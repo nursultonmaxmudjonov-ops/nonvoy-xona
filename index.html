@@ -50,10 +50,6 @@
         .font-serif {
             font-family: 'Playfair Display', serif;
         }
-        .smooth-scroll-container {
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
         
         /* Nonni chizish animatsiyasi (SVG Line Drawing) */
         .bread-draw {
@@ -104,14 +100,12 @@
     <div x-show="isLoading" x-transition.opacity.duration.600ms class="fixed inset-0 z-50 bg-[#1c1917] flex flex-col items-center justify-center text-white select-none">
         <div class="relative w-44 h-44 flex items-center justify-center">
             
-            <!-- Tandirdan chiqayotgan issiq tutunlar -->
             <div class="absolute -top-6 flex gap-3 text-amber-400/80">
                 <span class="steam-line text-lg font-bold" style="animation-delay: 0s;">♨</span>
                 <span class="steam-line text-xl font-bold" style="animation-delay: 0.4s;">♨</span>
                 <span class="steam-line text-lg font-bold" style="animation-delay: 0.8s;">♨</span>
             </div>
 
-            <!-- Non SVG Chizilishi -->
             <svg class="w-36 h-36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="50" cy="50" r="42" stroke="#f59e0b" stroke-width="4" stroke-linecap="round" class="bread-draw" />
                 <circle cx="50" cy="50" r="22" stroke="#d97706" stroke-width="3" stroke-dasharray="4 4" class="bread-draw" style="animation-delay: 0.4s;" />
@@ -123,7 +117,6 @@
             </svg>
         </div>
 
-        <!-- Tagidan chiqib, sekin yo'qolib kirib ketuvchi sarlavha -->
         <div class="overflow-hidden h-12 mt-2">
             <h2 class="text-3xl font-serif font-bold text-amber-400 animate-title-slide">
                 Nonchi Aka
@@ -132,18 +125,21 @@
         <p class="text-xs text-stone-400 uppercase tracking-widest mt-1 opacity-75">Issiq tandir nonlari...</p>
     </div>
 
-    <!-- PROFIL & EDIT MODAL -->
+    <!-- PROFIL & TAHRIRLASH MODALI -->
     <div x-show="profileModalOpen" x-transition.opacity class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
         <div @click.away="profileModalOpen = false" x-transition class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-amber-100 animate-fade">
             <div class="flex justify-between items-center">
-                <h3 class="text-xl font-serif font-bold text-warm-900">Mening Profilim</h3>
+                <div>
+                    <h3 class="text-xl font-serif font-bold text-warm-900">Mening Profilim</h3>
+                    <p class="text-xs text-warm-500 mt-0.5">Ma'lumotlaringizni tahrirlashingiz mumkin</p>
+                </div>
                 <button @click="profileModalOpen = false" class="w-9 h-9 rounded-2xl bg-amber-50 text-amber-800 hover:bg-amber-100 flex items-center justify-center transition">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <!-- Profile Image Upload Area -->
-            <div class="flex flex-col items-center space-y-3">
+            <!-- Profile Avatar Upload -->
+            <div class="flex flex-col items-center space-y-2">
                 <div class="relative group w-24 h-24 rounded-full overflow-hidden border-4 border-amber-500 shadow-md">
                     <img :src="currentUser.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(currentUser.name || 'User') + '&background=f59e0b&color=fff'" class="w-full h-full object-cover">
                     <label class="absolute inset-0 bg-black/40 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition cursor-pointer">
@@ -151,7 +147,7 @@
                         <input type="file" @change="uploadAvatar" accept="image/*" class="hidden">
                     </label>
                 </div>
-                <span class="text-xs text-amber-600 font-medium">Rasm o'zgartirish uchun bosing</span>
+                <span class="text-xs text-amber-600 font-semibold">Rasm o'zgartirish uchun bosing</span>
             </div>
 
             <!-- Profile Form -->
@@ -161,8 +157,12 @@
                     <input type="text" x-model="currentUser.name" required class="w-full bg-warm-50 px-4 py-3 rounded-2xl border border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-warm-700 mb-1">Telefon raqamingiz</label>
+                    <label class="block text-xs font-bold text-warm-700 mb-1">Telefon raqam</label>
                     <input type="tel" x-model="currentUser.phone" required class="w-full bg-warm-50 px-4 py-3 rounded-2xl border border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-warm-700 mb-1">Yetkazib berish manzili / Mo'ljal</label>
+                    <input type="text" x-model="currentUser.address" placeholder="Masalan: Toshkent sh., Chilonzor 10-mavze" class="w-full bg-warm-50 px-4 py-3 rounded-2xl border border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm">
                 </div>
                 <div class="flex gap-3 pt-2">
                     <button type="submit" class="flex-1 py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl shadow-lg shadow-amber-600/30 transition text-sm active:scale-95">Saqlash</button>
@@ -198,6 +198,10 @@
                 <div>
                     <label class="block text-xs font-bold text-warm-700 mb-1">Telefon raqam</label>
                     <input type="tel" x-model="authForm.phone" placeholder="+998 90 123-45-67" required class="w-full bg-warm-50 px-4 py-3 rounded-2xl border border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm">
+                </div>
+                <div x-show="authMode === 'register'">
+                    <label class="block text-xs font-bold text-warm-700 mb-1">Yetkazib berish manzili</label>
+                    <input type="text" x-model="authForm.address" placeholder="Toshkent sh., Yunusobod..." class="w-full bg-warm-50 px-4 py-3 rounded-2xl border border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm">
                 </div>
                 <button type="submit" class="w-full py-4 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl shadow-lg shadow-amber-600/30 transition text-sm active:scale-95" x-text="authMode === 'login' ? 'Kirish' : 'Ro\'yxatdan o\'tish'"></button>
             </form>
@@ -267,7 +271,7 @@
     </header>
 
     <!-- MAIN CONTENT -->
-    <main class="min-h-[80vh] smooth-scroll-container">
+    <main class="min-h-[80vh]">
 
         <!-- 1. BOSH SAHIFA -->
         <section x-show="activeTab === 'home'" class="space-y-16 pb-20 animate-fade">
@@ -398,9 +402,8 @@
             </div>
         </section>
 
-        <!-- 3. BIZ HAQIMIZDA (KENGAYTIRILGAN VA BOY BO'LIM) -->
-        <section x-show="activeTab === 'about'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-20 animate-fade">
-            <!-- Hero Grid -->
+        <!-- 3. BIZ HAQIMIZDA -->
+        <section x-show="activeTab === 'about'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-16 animate-fade">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div class="space-y-6">
                     <span class="text-amber-600 font-bold tracking-wider uppercase text-xs">Tariximiz va qadriyatlarimiz</span>
@@ -408,7 +411,7 @@
                         Nonchi Aka — sifat va halollik belgisi
                     </h2>
                     <p class="text-base text-warm-600 leading-relaxed">
-                        "Nonchi Aka" nonvoyxonasi o'zining issiq va xushbo'y tandir nonlari bilan xaridorlarga xizmat ko'rsatib kelmoqda. Biz har bir nonni o'z ishining ustalari tomonidan maxsus retseptlar asosida yopamiz. Har bir tayyorlangan nonimizda xushbo'y ta'm va mehr mujassam.
+                        "Nonchi Aka" nonvoyxonasi o'zining issiq va xushbo'y tandir nonlari bilan xaridorlarga xizmat ko'rsatib kelmoqda. Biz har bir nonni o'z ishining ustalari tomonidan maxsus retseptlar asosida yopamiz.
                     </p>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
@@ -416,121 +419,62 @@
                     <img src="./png.1.webp" alt="Katlama patir" class="w-full h-56 object-cover rounded-3xl shadow-xl pt-8">
                 </div>
             </div>
-
-            <!-- Stats Bar -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 bg-amber-50/80 p-8 rounded-3xl border border-amber-200/60 shadow-sm text-center">
-                <div>
-                    <span class="block text-3xl sm:text-4xl font-extrabold text-amber-700 font-serif">10+</span>
-                    <span class="text-xs sm:text-sm text-warm-600 mt-1 block">Yillik Tajriba</span>
-                </div>
-                <div>
-                    <span class="block text-3xl sm:text-4xl font-extrabold text-amber-700 font-serif">15k+</span>
-                    <span class="text-xs sm:text-sm text-warm-600 mt-1 block">Mamnun Mijozlar</span>
-                </div>
-                <div>
-                    <span class="block text-3xl sm:text-4xl font-extrabold text-amber-700 font-serif">20+</span>
-                    <span class="text-xs sm:text-sm text-warm-600 mt-1 block">Non va Patir Turlari</span>
-                </div>
-                <div>
-                    <span class="block text-3xl sm:text-4xl font-extrabold text-amber-700 font-serif">100%</span>
-                    <span class="text-xs sm:text-sm text-warm-600 mt-1 block">Tabiiy Masalliqlar</span>
-                </div>
-            </div>
-
-            <!-- Workflow / Process -->
-            <div class="space-y-10">
-                <div class="text-center max-w-2xl mx-auto space-y-2">
-                    <span class="text-amber-600 font-bold uppercase text-xs tracking-wider">Jarayon</span>
-                    <h3 class="text-2xl sm:text-4xl font-serif font-bold text-warm-900">Nonlarimiz qanday tayyorlanadi?</h3>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="bg-white p-6 rounded-3xl border border-amber-100 shadow-md space-y-3">
-                        <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-extrabold text-xl font-serif">1</div>
-                        <h4 class="font-bold text-warm-900 text-lg">Xamir qorish va tindirish</h4>
-                        <p class="text-sm text-warm-600">Oliy navli tabiiy un va maxsus achitqilar yordamida oshirilgan xamir tayyorlanadi.</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-3xl border border-amber-100 shadow-md space-y-3">
-                        <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-extrabold text-xl font-serif">2</div>
-                        <h4 class="font-bold text-warm-900 text-lg">Usta qo'li va naqshlar</h4>
-                        <p class="text-sm text-warm-600">Tajribali usta nonvoylarimiz har bir nonga an'anaviy chekchich urib naqsh berishadi.</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-3xl border border-amber-100 shadow-md space-y-3">
-                        <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-extrabold text-xl font-serif">3</div>
-                        <h4 class="font-bold text-warm-900 text-lg">O'tinli tandirda yopish</h4>
-                        <p class="text-sm text-warm-600">Haqiqiy o'tin olovida qizdirilgan tandirda oltin rangga kirguncha pishiriladi.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Customer Reviews -->
-            <div class="space-y-8 pt-4">
-                <div class="text-center space-y-2">
-                    <span class="text-amber-600 font-bold uppercase text-xs tracking-wider">Mijozlarimiz fikri</span>
-                    <h3 class="text-2xl sm:text-4xl font-serif font-bold text-warm-900">Xaridorlarimiz nima deydi?</h3>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-3xl border border-amber-100 shadow-sm space-y-3">
-                        <div class="flex text-amber-400 gap-1 text-xs"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-                        <p class="text-sm text-warm-600">"Tandirdan chiqqan issiq nonining hidi va ta'mi bolaligimni eslatadi. Doimiy mijoziman!"</p>
-                        <span class="block text-xs font-bold text-warm-900">— Jamshid M.</span>
-                    </div>
-                    <div class="bg-white p-6 rounded-3xl border border-amber-100 shadow-sm space-y-3">
-                        <div class="flex text-amber-400 gap-1 text-xs"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-                        <p class="text-sm text-warm-600">"Qatlama patirlari juda yumshoq va saryog'li. Mehmonlarimizga juda yoqdi."</p>
-                        <span class="block text-xs font-bold text-warm-900">— Nilufar R.</span>
-                    </div>
-                    <div class="bg-white p-6 rounded-3xl border border-amber-100 shadow-sm space-y-3">
-                        <div class="flex text-amber-400 gap-1 text-xs"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i></div>
-                        <p class="text-sm text-warm-600">"Telegram bot va sayt orqali buyurtma berish juda oson. Issiq holida yetkazib berishdi."</p>
-                        <span class="block text-xs font-bold text-warm-900">— Bekzod T.</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ Section -->
-            <div class="max-w-3xl mx-auto space-y-6 pt-4">
-                <h3 class="text-2xl font-serif font-bold text-center text-warm-900">Ko'p beriladigan savollar</h3>
-                <div class="space-y-4">
-                    <div class="bg-white p-6 rounded-3xl border border-amber-100 shadow-sm">
-                        <h4 class="font-bold text-warm-900 mb-1">Nonlar har doim issiq bo'ladimi?</h4>
-                        <p class="text-sm text-warm-600">Ha, tandirimiz har soatda yoqiladi. Buyurtmangiz pishishi bilan tezkor yetkaziladi.</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-3xl border border-amber-100 shadow-sm">
-                        <h4 class="font-bold text-warm-900 mb-1">Katta tadbirlar va to'ylar uchun buyurtma berish mumkinmi?</h4>
-                        <p class="text-sm text-warm-600">Albatta! Oldindan qo'ng'iroq qilib yoki bot orqali har qanday miqdorda patir va nonlarga buyurtma berishingiz mumkin.</p>
-                    </div>
-                </div>
-            </div>
         </section>
 
-        <!-- 4. ALOQA -->
+        <!-- 4. ALOQA (MINIMALISTIK VA MUKAMMAL BO'LIM) -->
         <section x-show="activeTab === 'contact'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-12 animate-fade">
-            <div class="text-center max-w-2xl mx-auto space-y-3">
+            <div class="text-center max-w-2xl mx-auto space-y-2">
                 <span class="text-amber-600 font-bold tracking-wider uppercase text-xs">Bog'lanish</span>
-                <h2 class="text-2xl sm:text-4xl font-serif font-bold text-warm-900">Biz bilan bog'laning</h2>
+                <h2 class="text-3xl sm:text-4xl font-serif font-bold text-warm-900">Biz bilan bog'laning</h2>
+                <p class="text-sm text-warm-500">Savollaringiz bormi? Biz doimo aloqadamiz!</p>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
-                <div class="bg-white p-6 rounded-3xl shadow-xl border border-amber-100 flex flex-col items-center text-center space-y-3">
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Phone Card -->
+                <div class="bg-white p-6 rounded-3xl shadow-lg border border-amber-100/80 flex flex-col items-center text-center space-y-3 hover:scale-105 transition">
                     <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl">
                         <i class="fa-solid fa-phone"></i>
                     </div>
-                    <h4 class="font-bold text-warm-900 text-lg">Telefon raqamlar</h4>
+                    <h4 class="font-bold text-warm-900 text-lg">Telefon</h4>
                     <div class="text-sm text-warm-600 font-semibold space-y-1">
-                        <a href="tel:+998909229920" class="hover:text-amber-600 block">+998 (90) 922-99-20</a>
-                        <a href="tel:+998909228820" class="hover:text-amber-600 block">+998 (90) 922-88-20</a>
+                        <a href="tel:+998909229920" class="hover:text-amber-600 block transition">+998 (90) 922-99-20</a>
+                        <a href="tel:+998909228820" class="hover:text-amber-600 block transition">+998 (90) 922-88-20</a>
                     </div>
                 </div>
-                <div class="bg-white p-6 rounded-3xl shadow-xl border border-amber-100 flex flex-col items-center text-center space-y-3">
+
+                <!-- Hours Card -->
+                <div class="bg-white p-6 rounded-3xl shadow-lg border border-amber-100/80 flex flex-col items-center text-center space-y-3 hover:scale-105 transition">
                     <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl">
                         <i class="fa-solid fa-clock"></i>
                     </div>
                     <h4 class="font-bold text-warm-900 text-lg">Ish tartibi</h4>
-                    <p class="text-sm text-warm-600">Har kuni: <b>06:00 - 22:00</b></p>
+                    <p class="text-sm text-warm-600 font-medium">Har kuni:<br><span class="font-bold text-amber-700">06:00 - 22:00</span></p>
+                </div>
+
+                <!-- Location Card -->
+                <div class="bg-white p-6 rounded-3xl shadow-lg border border-amber-100/80 flex flex-col items-center text-center space-y-3 hover:scale-105 transition">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <h4 class="font-bold text-warm-900 text-lg">Manzilimiz</h4>
+                    <p class="text-sm text-warm-600 font-medium">Toshkent shahri,<br>Markaziy nonvoyxona</p>
+                </div>
+
+                <!-- Social Media Card -->
+                <div class="bg-white p-6 rounded-3xl shadow-lg border border-amber-100/80 flex flex-col items-center text-center space-y-3 hover:scale-105 transition">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-2xl">
+                        <i class="fa-solid fa-hashtag"></i>
+                    </div>
+                    <h4 class="font-bold text-warm-900 text-lg">Ijtimoiy tarmoqlar</h4>
+                    <div class="flex gap-3 pt-1">
+                        <a :href="botUrl" target="_blank" class="w-9 h-9 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center hover:bg-sky-600 hover:text-white transition"><i class="fa-brands fa-telegram"></i></a>
+                        <a href="#" class="w-9 h-9 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center hover:bg-pink-600 hover:text-white transition"><i class="fa-brands fa-instagram"></i></a>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- 5. SAVAT -->
+        <!-- 5. SAVAT (PERSISTENT CART) -->
         <section x-show="activeTab === 'cart'" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 animate-fade">
             <div class="text-center space-y-2">
                 <h2 class="text-2xl sm:text-3xl font-serif font-bold text-warm-900">Sizning savatingiz</h2>
@@ -599,8 +543,8 @@
                 isLoggedIn: false,
                 authModalOpen: false,
                 authMode: 'login',
-                authForm: { name: '', phone: '' },
-                currentUser: { name: '', phone: '', avatar: '' },
+                authForm: { name: '', phone: '', address: '' },
+                currentUser: { name: '', phone: '', address: '', avatar: '' },
 
                 products: [
                     { id: 1, name: 'Tandir Non', category: 'tandir', categoryName: 'Tandir non', price: 5000, desc: 'Olovli tandirda yopilgan klassik issiq non.', image: './png.2.jpg' },
@@ -614,11 +558,22 @@
                         this.isLoading = false;
                     }, 2400);
 
+                    // Load User profile
                     let savedUser = localStorage.getItem('bakery_user');
                     if (savedUser) {
                         this.currentUser = JSON.parse(savedUser);
                         this.isLoggedIn = true;
                     }
+
+                    // Load Cart from localStorage
+                    let savedCart = localStorage.getItem('bakery_cart');
+                    if (savedCart) {
+                        this.cart = JSON.parse(savedCart);
+                    }
+                },
+
+                saveCart() {
+                    localStorage.setItem('bakery_cart', JSON.stringify(this.cart));
                 },
 
                 handleAuth() {
@@ -629,6 +584,7 @@
                     this.currentUser = {
                         name: this.authForm.name || 'Mijoz',
                         phone: this.authForm.phone,
+                        address: this.authForm.address || '',
                         avatar: ''
                     };
                     this.isLoggedIn = true;
@@ -658,7 +614,7 @@
                 logout() {
                     this.isLoggedIn = false;
                     this.profileModalOpen = false;
-                    this.currentUser = { name: '', phone: '', avatar: '' };
+                    this.currentUser = { name: '', phone: '', address: '', avatar: '' };
                     localStorage.removeItem('bakery_user');
                 },
 
@@ -682,14 +638,23 @@
                     } else {
                         this.cart.push({ ...product, quantity: 1 });
                     }
+                    this.saveCart();
                 },
-                increaseQuantity(item) { item.quantity++; },
+                increaseQuantity(item) { 
+                    item.quantity++; 
+                    this.saveCart();
+                },
                 decreaseQuantity(item) {
-                    if (item.quantity > 1) item.quantity--;
-                    else this.removeFromCart(item);
+                    if (item.quantity > 1) {
+                        item.quantity--;
+                    } else {
+                        this.removeFromCart(item);
+                    }
+                    this.saveCart();
                 },
                 removeFromCart(item) {
                     this.cart = this.cart.filter(p => p.id !== item.id);
+                    this.saveCart();
                 },
                 checkout() {
                     if (this.cart.length === 0) return;
@@ -699,7 +664,7 @@
                         return;
                     }
 
-                    let orderText = `🛒 Yangi buyurtma!\n\n👤 Mijoz: ${this.currentUser.name}\n📞 Tel: ${this.currentUser.phone}\n\n`;
+                    let orderText = `🛒 Yangi buyurtma!\n\n👤 Mijoz: ${this.currentUser.name}\n📞 Tel: ${this.currentUser.phone}\n📍 Manzil: ${this.currentUser.address || 'Kiritilmagan'}\n\n`;
                     this.cart.forEach(i => {
                         orderText += `- ${i.name} x ${i.quantity} = ${(i.price * i.quantity).toLocaleString()} so'm\n`;
                     });
@@ -708,7 +673,7 @@
                     if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.sendData) {
                         window.Telegram.WebApp.sendData(orderText);
                     } else {
-                        alert("Buyurtma muvaffaqiyatli rasmiylashtirildi! Telegram botga yuborilmoqda...");
+                        alert("Buyurtma muvaffaqiyatli rasmiylashtirildi!");
                         window.location.href = this.botUrl + "?start=order";
                     }
                 }
