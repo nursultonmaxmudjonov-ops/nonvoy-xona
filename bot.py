@@ -1,19 +1,19 @@
 import asyncio
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo, MenuButtonWebApp
 
 TOKEN = "8841434385:AAFgNWa1sSXN_017zUxOdbHxGpiz_Pj0VUY"
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# Vercel havolangiz ulandi
 WEBAPP_URL = "https://non-savdo-online.vercel.app/"
 
+# Asosiy chat tugmalari
 main_keyboard = ReplyKeyboardMarkup(
     keyboard=[
-        [KeyboardButton(text="🥐 Menuni ochish (Buyurtma)", web_app=WebAppInfo(url=WEBAPP_URL))],
+        [KeyboardButton(text="🥐 Menuni ochish", web_app=WebAppInfo(url=WEBAPP_URL))],
         [KeyboardButton(text="📞 Aloqa"), KeyboardButton(text="ℹ️ Biz haqimizda")]
     ],
     resize_keyboard=True
@@ -21,15 +21,26 @@ main_keyboard = ReplyKeyboardMarkup(
 
 @dp.message(CommandStart())
 async def start_cmd(message: types.Message):
+    # Telegram'ning chap pastki burchagidagi (Chat bar) WebApp tugmasini sozlash
+    try:
+        await bot.set_chat_menu_button(
+            chat_id=message.chat.id,
+            menu_button=MenuButtonWebApp(
+                text="🥐 Menuni ochish",
+                web_app=WebAppInfo(url=WEBAPP_URL)
+            )
+        )
+    except Exception as e:
+        print(f"Menu button o'rnatishda xatolik: {e}")
+
     await message.answer(
         f"Salom, {message.from_user.first_name}!\n"
         f"**Nonchi Aka** nonvoyxonasining rasmiy botiga xush kelibsiz! 🥐\n\n"
-        f"Issiq tandir nonlari va patirlarni tanlash hamda buyurtma berish uchun quyidagi **Menuni ochish** tugmasini bosing:",
+        f"Pastdagi tugmani bosing yoki чатнинг chap pastki qismidagi **'Menuni ochish'** tugmasidan foydalaning:",
         reply_markup=main_keyboard,
         parse_mode="Markdown"
     )
 
-# WebApp (sayt) ichidan "Buyurtmani rasmiylashtirish" bosilganda keladigan ma'lumotni qabul qilish
 @dp.message(F.web_app_data)
 async def handle_web_app_data(message: types.Message):
     order_info = message.web_app_data.data
