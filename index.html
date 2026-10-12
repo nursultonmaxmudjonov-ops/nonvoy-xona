@@ -90,6 +90,14 @@
         .animate-fade {
             animation: fadeIn 0.4s ease-out forwards;
         }
+        
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
 </head>
 <body class="bg-warm-50 dark:bg-stone-900 text-warm-900 dark:text-stone-100 antialiased selection:bg-amber-500 selection:text-white transition-colors duration-300" x-data="bakeryApp()" x-init="initApp()" :class="{ 'dark': darkMode }">
@@ -215,7 +223,7 @@
                     <div>
                         <h3 class="font-bold text-warm-900 dark:text-stone-100 text-base">Nonchi AI Maslahatchi</h3>
                         <span class="text-xs text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1">
-                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Ovozli va Menyuli Rejim
+                            <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Aqlli Ovozli Rejim
                         </span>
                     </div>
                 </div>
@@ -271,7 +279,7 @@
         </div>
     </div>
 
-    <!-- HEADER -->
+    <!-- HEADER / NAVIGATION -->
     <header class="sticky top-0 z-40 bg-white/90 dark:bg-stone-900/90 backdrop-blur-md border-b border-amber-100 dark:border-stone-800 shadow-sm transition-colors duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
@@ -293,11 +301,34 @@
                 </nav>
 
                 <div class="flex items-center gap-2 sm:gap-3">
-                    <select x-model="lang" class="bg-amber-50 dark:bg-stone-800 text-warm-800 dark:text-stone-200 px-2 py-1.5 rounded-xl border border-amber-200 dark:border-stone-700 text-xs font-bold focus:outline-none">
-                        <option value="uz">UZ</option>
-                        <option value="ru">RU</option>
-                        <option value="en">EN</option>
-                    </select>
+                    <!-- TELEGRAM BOT LINK TUGMASI -->
+                    <a :href="botUrl" target="_blank" class="hidden sm:flex items-center gap-2 px-3 py-2 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-2xl text-xs transition shadow-sm">
+                        <i class="fa-brands fa-telegram text-base"></i>
+                        <span>Telegram Bot</span>
+                    </a>
+
+                    <!-- CUSTOM DROPDOWN TIL TANLASH -->
+                    <div class="relative" x-data="{ langOpen: false }" @click.away="langOpen = false">
+                        <button @click="langOpen = !langOpen" class="flex items-center gap-2 bg-amber-50 dark:bg-stone-800 text-warm-800 dark:text-stone-200 px-3.5 py-2 rounded-2xl border border-amber-200/60 dark:border-stone-700 text-xs font-bold transition hover:bg-amber-100 dark:hover:bg-stone-700 shadow-sm">
+                            <span x-text="lang.toUpperCase()"></span>
+                            <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-200" :class="langOpen ? 'rotate-180' : ''"></i>
+                        </button>
+                        
+                        <div x-show="langOpen" x-transition class="absolute right-0 mt-2 w-28 bg-white dark:bg-stone-800 border border-amber-100 dark:border-stone-700 rounded-2xl shadow-xl overflow-hidden z-50 py-1.5">
+                            <button @click="lang = 'uz'; langOpen = false" class="w-full text-left px-4 py-2 text-xs font-bold transition flex items-center justify-between" :class="lang === 'uz' ? 'text-amber-600 dark:text-amber-400 bg-amber-50/60 dark:bg-stone-700/60' : 'text-warm-800 dark:text-stone-200 hover:bg-amber-50 dark:hover:bg-stone-700'">
+                                <span>O'zbekcha</span>
+                                <span class="text-[10px]">UZ</span>
+                            </button>
+                            <button @click="lang = 'ru'; langOpen = false" class="w-full text-left px-4 py-2 text-xs font-bold transition flex items-center justify-between" :class="lang === 'ru' ? 'text-amber-600 dark:text-amber-400 bg-amber-50/60 dark:bg-stone-700/60' : 'text-warm-800 dark:text-stone-200 hover:bg-amber-50 dark:hover:bg-stone-700'">
+                                <span>Русский</span>
+                                <span class="text-[10px]">RU</span>
+                            </button>
+                            <button @click="lang = 'en'; langOpen = false" class="w-full text-left px-4 py-2 text-xs font-bold transition flex items-center justify-between" :class="lang === 'en' ? 'text-amber-600 dark:text-amber-400 bg-amber-50/60 dark:bg-stone-700/60' : 'text-warm-800 dark:text-stone-200 hover:bg-amber-50 dark:hover:bg-stone-700'">
+                                <span>English</span>
+                                <span class="text-[10px]">EN</span>
+                            </button>
+                        </div>
+                    </div>
 
                     <button @click="darkMode = !darkMode" class="p-2.5 rounded-2xl bg-amber-50 dark:bg-stone-800 text-amber-800 dark:text-amber-400 border border-amber-200/60 dark:border-stone-700 transition">
                         <i :class="darkMode ? 'fa-solid fa-sun' : 'fa-solid fa-moon'" class="text-base"></i>
@@ -318,8 +349,24 @@
                         <span class="hidden sm:inline text-sm font-bold" x-text="t('cart')"></span>
                         <span x-show="cartCount > 0" x-text="cartCount" class="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center shadow-md animate-pulse"></span>
                     </button>
+
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-3 rounded-2xl bg-amber-50 dark:bg-stone-800 text-amber-800 dark:text-amber-400 border border-amber-200/60 dark:border-stone-700">
+                        <i :class="mobileMenuOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars'" class="text-xl"></i>
+                    </button>
                 </div>
             </div>
+        </div>
+
+        <!-- Mobil Menyu -->
+        <div x-show="mobileMenuOpen" @click.away="mobileMenuOpen = false" x-transition class="md:hidden bg-white dark:bg-stone-800 border-b border-amber-100 dark:border-stone-700 px-4 pt-2 pb-6 space-y-2 shadow-xl animate-fade">
+            <button @click="activeTab = 'home'; mobileMenuOpen = false" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-warm-800 dark:text-stone-200 hover:bg-amber-50 dark:hover:bg-stone-700 transition" x-text="t('home')"></button>
+            <button @click="activeTab = 'products'; mobileMenuOpen = false" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-warm-800 dark:text-stone-200 hover:bg-amber-50 dark:hover:bg-stone-700 transition" x-text="t('products')"></button>
+            <button @click="activeTab = 'about'; mobileMenuOpen = false" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-warm-800 dark:text-stone-200 hover:bg-amber-50 dark:hover:bg-stone-700 transition" x-text="t('about')"></button>
+            <button @click="activeTab = 'contact'; mobileMenuOpen = false" class="w-full text-left px-4 py-3 rounded-xl font-semibold text-warm-800 dark:text-stone-200 hover:bg-amber-50 dark:hover:bg-stone-700 transition" x-text="t('contact')"></button>
+            <a :href="botUrl" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-sky-500 text-white font-bold rounded-xl text-sm">
+                <i class="fa-brands fa-telegram text-lg"></i>
+                <span>Telegram Botga O'tish</span>
+            </a>
         </div>
     </header>
 
@@ -344,10 +391,58 @@
                                     <span x-text="t('viewMenu')"></span>
                                     <i class="fa-solid fa-arrow-right"></i>
                                 </button>
+                                <a :href="botUrl" target="_blank" class="w-full sm:w-auto px-6 py-4 bg-sky-500 hover:bg-sky-600 text-white font-bold rounded-2xl shadow-xl transition flex items-center justify-center gap-3">
+                                    <i class="fa-brands fa-telegram text-xl"></i>
+                                    <span>Telegram Bot</span>
+                                </a>
                             </div>
                         </div>
                         <div class="relative flex justify-center">
                             <img src="./png.2.jpg" alt="Tandir non" class="w-full max-w-md aspect-square object-cover rounded-3xl shadow-2xl border-4 border-amber-500/30">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AFZALLIKLAR VA SHARHLAR -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white dark:bg-stone-800 p-6 rounded-3xl shadow-lg border border-amber-100 dark:border-stone-700 text-center space-y-3">
+                        <div class="w-14 h-14 bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center mx-auto text-2xl">
+                            <i class="fa-solid fa-fire"></i>
+                        </div>
+                        <h3 class="font-bold text-lg">Olovli Tandir</h3>
+                        <p class="text-sm text-warm-600 dark:text-stone-400">Har bir non maxsus o'tin cho'g'ida an'anaviy usulda yopiladi.</p>
+                    </div>
+                    <div class="bg-white dark:bg-stone-800 p-6 rounded-3xl shadow-lg border border-amber-100 dark:border-stone-700 text-center space-y-3">
+                        <div class="w-14 h-14 bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center mx-auto text-2xl">
+                            <i class="fa-solid fa-truck-fast"></i>
+                        </div>
+                        <h3 class="font-bold text-lg">Tezkor Yetkazish</h3>
+                        <p class="text-sm text-warm-600 dark:text-stone-400">Buyurtmangiz issiqqina holatda uyingizga yetkazib beriladi.</p>
+                    </div>
+                    <div class="bg-white dark:bg-stone-800 p-6 rounded-3xl shadow-lg border border-amber-100 dark:border-stone-700 text-center space-y-3">
+                        <div class="w-14 h-14 bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center mx-auto text-2xl">
+                            <i class="fa-solid fa-seedling"></i>
+                        </div>
+                        <h3 class="font-bold text-lg">100% Tabiiy</h3>
+                        <p class="text-sm text-warm-600 dark:text-stone-400">Faqat saralangan un, sut va tabiiy masalliqlar ishlatiladi.</p>
+                    </div>
+                </div>
+
+                <!-- Mijozlar Sharhlari -->
+                <div class="bg-amber-50/60 dark:bg-stone-800/60 p-8 rounded-3xl border border-amber-100 dark:border-stone-700 space-y-6">
+                    <h3 class="text-2xl font-serif font-bold text-center">Mijozlarimiz nima deydi?</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white dark:bg-stone-700 p-6 rounded-2xl shadow-sm space-y-2">
+                            <div class="flex text-amber-500 text-sm">★★★★★</div>
+                            <p class="text-sm italic">"Nonlari juda yumshoq va mazali ekan. Ayniqsa saryog'li qatlama patiriga gap yo'q!"</p>
+                            <span class="block text-xs font-bold text-amber-700 dark:text-amber-400">— Anvarjon, Toshkent sh.</span>
+                        </div>
+                        <div class="bg-white dark:bg-stone-700 p-6 rounded-2xl shadow-sm space-y-2">
+                            <div class="flex text-amber-500 text-sm">★★★★★</div>
+                            <p class="text-sm italic">"Tez yetkazib berishdi, non hali tandirdan chiqqandek issiq edi. Rahmat!"</p>
+                            <span class="block text-xs font-bold text-amber-700 dark:text-amber-400">— Dilshod, Yunusobod</span>
                         </div>
                     </div>
                 </div>
@@ -365,7 +460,7 @@
                         <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-warm-400"></i>
                         <input type="text" x-model="searchQuery" placeholder="Qidirish..." class="w-full bg-white dark:bg-stone-800 pl-11 pr-4 py-3 rounded-2xl border border-amber-200 dark:border-stone-700 focus:outline-none text-sm">
                     </div>
-                    <button @click="startVoiceRecognition" :class="isListening ? 'bg-red-500 text-white' : 'bg-amber-100 dark:bg-stone-800 text-amber-700 dark:text-amber-400'" class="p-3.5 rounded-2xl border border-amber-200 dark:border-stone-700 flex items-center justify-center">
+                    <button @click="startVoiceRecognition" :class="isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-amber-100 dark:bg-stone-800 text-amber-700 dark:text-amber-400'" class="p-3.5 rounded-2xl border border-amber-200 dark:border-stone-700 flex items-center justify-center">
                         <i class="fa-solid fa-microphone"></i>
                     </button>
                 </div>
@@ -388,7 +483,43 @@
             </div>
         </section>
 
-        <!-- 3. SAVAT -->
+        <!-- 3. BIZ HAQIMIZDA -->
+        <section x-show="activeTab === 'about'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8 animate-fade">
+            <h2 class="text-3xl font-serif font-bold text-warm-900 dark:text-stone-100" x-text="t('about')"></h2>
+            <div class="bg-white dark:bg-stone-800 p-8 sm:p-12 rounded-3xl shadow-xl border border-amber-100 dark:border-stone-700 space-y-6">
+                <p class="text-warm-700 dark:text-stone-300 leading-relaxed text-base">
+                    "Nonchi Aka" nonvoyxonasi o'z faoliyatini milliy qadriyatlarimizni e'zozlagan holda boshlagan. Biz har kuni tong saharda olovli tandirlarda eng saralangan un, sut va tabiiy masalliqardan issiq non va patirlar yopib mijozlarga taqdim etamiz.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-amber-100 dark:border-stone-700">
+                    <div>
+                        <h4 class="font-bold text-amber-600 text-lg mb-2">🍞 Bizning Maqsadimiz</h4>
+                        <p class="text-sm text-warm-600 dark:text-stone-400">An'anaviy o'zbek nonvoychiligini zamonaviy texnologiyalar bilan birlashtirib, har bir xonadonga issiq nonni qulay va tez yetkazib berish.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-amber-600 text-lg mb-2">🌟 Sifat Kafolati</h4>
+                        <p class="text-sm text-warm-600 dark:text-stone-400">Nonlarimiz hech qanday kimyoviy qo'shimchalarsiz, faqatgina toza mahsulotlardan yopiladi.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. ALOQA -->
+        <section x-show="activeTab === 'contact'" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8 animate-fade">
+            <h2 class="text-3xl font-serif font-bold text-warm-900 dark:text-stone-100" x-text="t('contact')"></h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="bg-white dark:bg-stone-800 p-6 rounded-3xl shadow-lg border border-amber-100 dark:border-stone-700 space-y-2">
+                    <h4 class="font-bold text-lg text-amber-600"><i class="fa-solid fa-phone"></i> Telefon raqamlar</h4>
+                    <p class="text-sm text-warm-700 dark:text-stone-300">+998 (90) 922-99-20</p>
+                </div>
+                <div class="bg-white dark:bg-stone-800 p-6 rounded-3xl shadow-lg border border-amber-100 dark:border-stone-700 space-y-2">
+                    <h4 class="font-bold text-lg text-amber-600"><i class="fa-solid fa-clock"></i> Ish tartibi va Manzil</h4>
+                    <p class="text-sm text-warm-700 dark:text-stone-300">Har kuni: 06:00 - 22:00</p>
+                    <p class="text-sm text-warm-700 dark:text-stone-300">Manzil: Toshkent shahar, Yunusobod tumani</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. SAVAT -->
         <section x-show="activeTab === 'cart'" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 animate-fade">
             <h2 class="text-2xl sm:text-3xl font-serif font-bold text-warm-900 dark:text-stone-100 text-center" x-text="t('cart')"></h2>
             <div class="bg-white dark:bg-stone-800 rounded-3xl shadow-xl border border-amber-100 dark:border-stone-700 p-6 space-y-6">
@@ -410,7 +541,7 @@
                                 </div>
                             </div>
                         </template>
-                        <button @click="checkout" class="w-full py-4 bg-amber-600 text-white font-bold rounded-2xl" x-text="t('checkout')"></button>
+                        <button @click="checkout" class="w-full py-4 bg-amber-600 text-white font-bold rounded-2xl shadow-lg shadow-amber-600/30" x-text="t('checkout')"></button>
                     </div>
                 </template>
             </div>
@@ -425,6 +556,7 @@
                 activeTab: 'home',
                 darkMode: false,
                 lang: 'uz',
+                mobileMenuOpen: false,
                 profileModalOpen: false,
                 authModalOpen: false,
                 aiModalOpen: false,
@@ -487,29 +619,23 @@
 
                 t(key) { return this.dictionary[this.lang][key] || key; },
 
-                // OVOZLARNI MOS HARAKATGA QARAB IJRO ETISH
                 speakText(text) {
                     if (!this.speechEnabled || !text) return;
 
                     let audioPath = '';
                     const q = text.toLowerCase();
 
-                    // 1-Ovoz: Salomlashish va yordam taklifi uchun (voise.1.mp3)
                     if (q.includes('assalomu alaykum') || q.includes('vaalaykum') || q.includes('yordam bera olaman')) {
                         audioPath = './voise.1.mp3';
-                    } 
-                    // 2-Ovoz: Nonlar narxi va menyu uchun (voise.2.mp3)
-                    else if (q.includes('tandir non') || q.includes('sedanalik') || q.includes('qatlama') || q.includes('5,000') || q.includes('narx') || q.includes('menyu')) {
+                    } else if (q.includes('tandir non') || q.includes('sedanalik') || q.includes('qatlama') || q.includes('5,000') || q.includes('narx') || q.includes('menyu')) {
                         audioPath = './voise.2.mp3';
-                    }
-                    // 3-Ovoz: Sayt maqsadi va sababi uchun (voise.3.mp3)
-                    else if (q.includes('oson non sotib olishingiz') || q.includes('sayt') || q.includes('nega') || q.includes('yaratildi') || q.includes('sabab')) {
+                    } else if (q.includes('oson non sotib olishingiz') || q.includes('sayt') || q.includes('nega') || q.includes('yaratildi') || q.includes('sabab')) {
                         audioPath = './voise.3.mp3';
                     }
 
                     if (audioPath) {
                         const audio = new Audio(audioPath);
-                        audio.play().catch(e => console.log("Audio ijro xatosi:", e));
+                        audio.play().catch(e => console.log("Audio xatosi:", e));
                     }
                 },
 
@@ -546,22 +672,15 @@
                 generateSmartReply(text) {
                     const q = text.toLowerCase();
 
-                    // 1. Salomlashish
                     if (q.includes('salom') || q.includes('assalom') || q.includes('qalaysan') || q.includes('yaxshimisiz')) {
                         return "Assalomu alaykum! Men Nonchi Aka AI yordamchisiman. Sizga qanday yordam bera olaman?";
                     }
-
-                    // 2. Nonlar va narxlar
                     if (q.includes('non') || q.includes('narx') || q.includes('menyu') || q.includes('qancha') || q.includes('patir')) {
                         return "Bizda Tandir Non — 5,000 so'm, Sedanalik Patir — 8,000 so'm va Qatlama Patir — 10,000 so'm turadi.";
                     }
-
-                    // 3. Nega bu sayt / Sayt maqsadi
                     if (q.includes('sayt') || q.includes('nega') || q.includes('sabab') || q.includes('yaratildi') || q.includes('uchun')) {
                         return "Bu sayt sizning oson non sotib olishingiz va tez buyurtma qilishingiz imkonini berish uchun yaratildi.";
                     }
-
-                    // Standart javob
                     return "Tushundim! Bizning menyuda Tandir Non (5,000 so'm), Sedanalik Patir (8,000 so'm) va Qatlama Patir (10,000 so'm) bor.";
                 },
 
